@@ -41,7 +41,7 @@ def load_books():
             for line in f:
                 line = line.strip()
                 if line:
-                    book_id, title, author, quantity = line.split()
+                    book_id, title, author, quantity = line.split(',')
 
                     book = {
                         'id': book_id,
@@ -152,8 +152,8 @@ def add_book(books_list, books_ids):
 
 books_list = load_books()
 book_ids = get_existing_books_id(books_list)
-print(books_list)
-add_book(books_list, book_ids)
+#print(books_list)
+#add_book(books_list, book_ids)
 
 ### Function to view all the books in the library
 def view_books(books_list):
@@ -165,4 +165,112 @@ def view_books(books_list):
     for book in books_list:
         print(f"{book['id']} | {book['title']} | {book['author']} | {book['quantity']}")
 
-view_books(books_list)
+#view_books(books_list)
+
+### Function to search a book using title or author
+
+def search_books(books_list):
+    found_items = []
+    """Search Books by book title or author name"""
+    search_term = input("Search here: ").strip().lower()
+
+    for book in books_list:
+        if search_term in book['title'] or search_term in book['author']:
+            found_items.append(book)
+    if found_items:
+        print(f"Found {len(found_items)} books")
+        view_books(found_items)
+
+    else:
+        print("No books available. ")
+
+#search_books(books_list)
+
+# save books to the file
+def save_books(books_list):
+    """Write all books back to books.txt"""
+    with open("books.txt", "w") as f:
+        for book in books_list:
+            f.write(f"{book['id']},{book['title']},{book['author']},{book['quantity']}")
+        
+### Issue book -> User takes a book from the library
+def issue_book(books_list):
+    book_id = input("Enter the book id to issue: ").strip()
+
+    for book in books_list:
+        if book['id'] == book_id:
+            if book['quantity'] > 0:
+                book['quantity'] -= 1
+
+                save_books(books_list)
+                print(f"Book {book['title']} issued successfully!")
+                print(f"Remaining quantity: {book['quantity']}")
+            else:
+                print("Book is currently out of stock!")
+                return
+print("Book id not found!")
+
+def return_book(books_list):
+    """Return a Book to user"""
+    book_id = input("Enter the book id to return: ").strip()
+    for book in books_list:
+        if book['id'] == book_id:
+            book['quantity'] += 1
+
+            save_books(books_list)
+
+            print(f"Book {book['title']} returned successfully!")
+            print(f"Current quantity: {book['quantity']}")
+print("Book id not found.")
+
+
+issue_book(books_list)
+issue_book(books_list)
+# add_book(books_list,get_exisiitng_books_id(books_list))
+# return_book(books_list)
+
+
+ ###MAIN FUNCTION TO RUN THE LIBRARY MANAGEMENT SYSTEM
+
+def main():
+    '''Main program loop'''
+    users_dict = load_users()
+    print("="*50)
+    print(" Welcome to the Library Management System ")
+    print("="*50)
+    while True:
+        print("\n1. Register")
+        print("2. Login")
+        print("3. Exit")
+        choice = input("Enter your choice: ").strip()
+        if choice == '1':
+            register_user(users_dict)
+        elif choice == '2':
+            username = login_user(users_dict)
+            if username:
+                books_list = load_books()
+                book_ids = get_exisiitng_books_id(books_list)
+                while True:
+                    main_menu()
+                    user_choice = input("Enter your choice: ").strip()
+                    if user_choice == '1':
+                        add_book(books_list, book_ids)
+                    elif user_choice == '2':
+                        view_books(books_list)
+                    elif user_choice == '3':
+                        search_books(books_list)
+                    elif user_choice == '4':
+                        issue_book(books_list)
+                    elif user_choice == '5':
+                        return_book(books_list)
+                    elif user_choice == '6':
+                        print("Exiting the system. Goodbye!")
+                        break
+                    else:
+                        print("Invalid choice. Please try again.")
+        elif choice == '3':
+            print("Exiting the system. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+main()            
